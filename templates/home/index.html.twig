@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello HomeController!{% endblock %}
+
+{% block body %}
+<!-- Hero section -->
+	<section class="hero-section">
+		<div class="hero-slider owl-carousel">
+			<div class="hs-item">
+				<div class="container">
+					<div class="row">
+						<div class="col-lg-6">
+							<div class="hs-text">
+								<h2><span>Food</span> for everyone.</h2>
+								<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Quis ipsum suspendisse ultrices gravida. </p>
+								<a href="{{path('menu')}}" class="site-btn">Menu Card</a>
+								{# <a href="{{path('app_order',{id: dish1.id})}}" class="site-btn sb-c2">Order Now</a> #}
+							</div>
+						</div>
+						<div class="col-lg-6">
+							<div class="hr-img">
+								<img src="{{asset('images/' ~ dish1.image)}}">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="hs-item">
+				<div class="container">
+					<div class="row">
+						<div class="col-lg-6">
+							<div class="hs-text">
+								<h2><span>Try </span>new food.</h2>
+								<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Quis ipsum suspendisse ultrices gravida. </p>
+								<a href="{{path('menu')}}" class="site-btn">Menu Card</a>
+								{# <a href="{{path('app_order',{id: dish2.id})}}" class="site-btn sb-c2">Order Now</a> #}
+							</div>
+						</div>
+						<div class="col-lg-6">
+							<div class="hr-img">
+								<img src="{{asset('images/' ~ dish2.image)}}">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<!-- Hero section end -->
+    {% endblock %}

@@ -1,0 +1,14 @@
+controllers:
+    resource:
+        path: ../src/Controller/
+        namespace: App\Controller
+    type: attribute
+
+# merchant_list:
+#     path: /merchant/
+#     controller: App\Controller\MerchantController:index
+#     methods: [GET]
+
+logout:     
+    path: /logout
+

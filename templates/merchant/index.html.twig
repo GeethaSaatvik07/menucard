@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Merchant index{% endblock %}
+
+{% block body %}
+    <h1>Merchant index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Address</th>
+                <th>Phonenumber</th>
+                <th>Email</th>
+                <th>Createdat</th>
+                <th>Updatedat</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for merchant in merchants %}
+            <tr>
+                <td>{{ merchant.id }}</td>
+                <td>{{ merchant.name }}</td>
+                <td>{{ merchant.address }}</td>
+                <td>{{ merchant.phonenumber }}</td>
+                <td>{{ merchant.email }}</td>
+                <td>{{ merchant.createdat ? merchant.createdat|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ merchant.updatedat ? merchant.updatedat|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_merchant_show', {'id': merchant.id}) }}">show</a>
+                    <a href="{{ path('app_merchant_edit', {'id': merchant.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="8">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_merchant_new') }}">Create new</a>
+{% endblock %}

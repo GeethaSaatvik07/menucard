@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Merchant{% endblock %}
+
+{% block body %}
+    <h1>Edit Merchant</h1>
+
+    {{ include('merchant/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_merchant_index') }}">back to list</a>
+
+    {{ include('merchant/_delete_form.html.twig') }}
+{% endblock %}
