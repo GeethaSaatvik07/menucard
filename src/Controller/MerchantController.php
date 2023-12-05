@@ -51,37 +51,7 @@ class MerchantController extends AbstractController
     #[Route('/new', name: 'app_merchant_new', methods: ['GET','POST'])]
     // public function new(Request $request, EntityManagerInterface $entityManager): Response
     public function createMerchant(Request $request, ManagerRegistry $doctrine)
-    {        
-        // $data = json_decode($request->getContent(), true); 
-
-        // if (!is_array($data)){
-        //     return $this->json("Invalid json data. Expected array", 400);
-        // }
-        // $em = $doctrine->getManager();
-        
-        // $merchants = [];
-
-        // foreach ($data as $merchantData){
-        //     $merchant = new Merchant();
-        //     $form = $this->createForm(MerchantType::class, $merchant);
-        //     $form->submit($merchantData);
-
-        //     // if ($form->isSubmitted() && $form->isValid()) {
-        //     if ($form->isSubmitted()){
-        //         $em->persist($merchant);
-        //         $merchants[] = $merchantData;
-        //     }
-        //     else{
-        //         return $this->json("Invalid Data", 400);
-        //     }
-        // }
-
-        // $em->flush();
-
-        // return $this->json($merchants,201);
-
-
-        
+    {         
         $data = json_decode($request->getContent(), true);
         
         if (!is_array($data)){
@@ -139,7 +109,6 @@ class MerchantController extends AbstractController
                 $em->persist($merchant);
                 $merchants[] = $merchantData;
             } else {
-                // Handle validation errors
                 $errors = [];
                 foreach ($form->getErrors(true) as $error) {
                     $errors[] = $error->getMessage();
@@ -173,23 +142,42 @@ class MerchantController extends AbstractController
     // public function edit(Request $request, Merchant $merchant, EntityManagerInterface $entityManager): Response
     public function edit(Request $request, int $id, ManagerRegistry $doctrine)
     {
-        $em = $doctrine->getManager();         
-        $merchant = $em->getRepository(Merchant::class)->find($id);         
+        // $em = $doctrine->getManager();         
+        // $merchant = $em->getRepository(Merchant::class)->find($id);         
         
-        if (!$merchant) {             
-            return $this->json("Merchant not found", 404);         
-        }         
-        $data = json_decode($request->getContent(), true);  
+        // if (!$merchant) {             
+        //     return $this->json("Merchant not found", 404);         
+        // }         
+        // $data = json_decode($request->getContent(), true);  
         
-        $form = $this->createForm(MerchantType::class, $merchant);
-        $form->submit($data);
+        // $form = $this->createForm(MerchantType::class, $merchant);
+        // $form->submit($data);
         
-        if ($form->isSubmitted()) {             
-            $em->flush();             
-            return $this->json($merchant, 200);         
-        }         
+        // if ($form->isSubmitted()) {             
+        //     $em->flush();             
+        //     return $this->json($merchant, 200);         
+        // }         
         
-        return $this->json("Invalid form data", 400);
+        // return $this->json("Invalid form data", 400);
+        $em = $doctrine->getManager();
+        $merchant = $em->getRepository(Merchant::class)->find($id);
+    
+        if (!$merchant) {
+            return new JsonResponse("Merchant not found", 404);
+        }
+    
+        $data = json_decode($request->getContent(), true);
+    
+        if (isset($data['name']) && isset($data['phonenumber']) && isset($data['address']) && isset($data['email'])) {
+            $merchant->setName($data['name']);
+            $merchant->setPhoneNumber($data['phonenumber']);
+            $merchant->setAddress($data['address']);
+            $merchant->setEmail($data['email']);
+        }
+    
+        $em->flush();
+    
+        return $this->json($merchant, 200);
 
         // if ($form->isSubmitted() && $form->isValid()) {
         //     $em->flush();
