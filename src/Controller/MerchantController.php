@@ -27,29 +27,17 @@ use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
 use Symfony\Component\Validator\Constraints as Assert;
 
-
-// $encoders = [new XmlEncoder(), new JsonEncoder()];
-// $normalizers = [new ObjectNormalizer()];
-// $serializer = new Serializer($normalizers, $encoders);
-// return $this->json($merchants, headers: array('Content-Type'=> 'application/json;charset=UTF-8'));
-
-
 #[Route('/merchant')]
 class MerchantController extends AbstractController
 {
     #[Route('/', name: 'app_merchant_index', methods: ['GET'])]
-    // public function index(MerchantRepository $merchantRepository, ManagerRegistry $doctrine)
     public function index(MerchantService $merchantService)
     {
-        // return $this->render('merchant/index.html.twig', [
-        //     'merchants' => $merchantRepository->findAll(),
-        // ]);
         $merchants = $merchantService->getAllMerchants();
         return $this->json($merchants);
     }
 
     #[Route('/new', name: 'app_merchant_new', methods: ['GET','POST'])]
-    // public function new(Request $request, EntityManagerInterface $entityManager): Response
     public function createMerchant(Request $request, ManagerRegistry $doctrine)
     {         
         $data = json_decode($request->getContent(), true);
@@ -121,87 +109,58 @@ class MerchantController extends AbstractController
          $em->flush();
         
         return $this->json($merchants, 201);
-
-        //     return $this->render('merchant/new.html.twig', [
-    //         'merchant' => $merchant,
-    //         'form' => $form,
-    //     ]);
     }
 
     #[Route('/{id}', name: 'app_merchant_show', methods: ['GET'])]
     public function show(MerchantService $merchantService, int $id)
     {
-        // return $this->render('merchant/show.html.twig', [
-        //     'merchant' => $merchant,
-        // ]);
         $merchant = $merchantService->getMerchantById($id);
         return $this->json($merchant);
     }
 
     #[Route('/{id}/edit', name: 'app_merchant_edit', methods: ['PUT'])]
-    // public function edit(Request $request, Merchant $merchant, EntityManagerInterface $entityManager): Response
     public function edit(Request $request, int $id, ManagerRegistry $doctrine)
     {
-        // $em = $doctrine->getManager();         
-        // $merchant = $em->getRepository(Merchant::class)->find($id);         
-        
-        // if (!$merchant) {             
-        //     return $this->json("Merchant not found", 404);         
-        // }         
-        // $data = json_decode($request->getContent(), true);  
-        
-        // $form = $this->createForm(MerchantType::class, $merchant);
-        // $form->submit($data);
-        
-        // if ($form->isSubmitted()) {             
-        //     $em->flush();             
-        //     return $this->json($merchant, 200);         
-        // }         
-        
-        // return $this->json("Invalid form data", 400);
         $em = $doctrine->getManager();
         $merchant = $em->getRepository(Merchant::class)->find($id);
-    
+        
         if (!$merchant) {
-            return new JsonResponse("Merchant not found", 404);
+            return $this->json("Merchant not found", 404);
         }
-    
+        
         $data = json_decode($request->getContent(), true);
-    
-        if (isset($data['name']) && isset($data['phonenumber']) && isset($data['address']) && isset($data['email'])) {
-            $merchant->setName($data['name']);
-            $merchant->setPhoneNumber($data['phonenumber']);
-            $merchant->setAddress($data['address']);
-            $merchant->setEmail($data['email']);
+        
+        if (!isset($data['name']) || !ctype_alpha($data['name'])) {
+            return $this->json("Name should contain only alphabets.", 400);
         }
-    
+        
+        if (!isset($data['address']) || !preg_match('/^[a-zA-Z0-9\s\-,.#]+$/', $data['address'])) {
+            return $this->json("Address should be alphanumeric with some special characters.", 400);
+        }
+          
+        if (!isset($data['phonenumber']) || !ctype_digit($data['phonenumber'])) {
+            return $this->json("Phone number should contain only numbers.", 400);
+        }
+
+        if (!isset($data['email']) || !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            return $this->json("Invalid email format.", 400);
+        }
+        
+        $merchant->setName($data['name']);
+        $merchant->setAddress($data['address']);
+        $merchant->setEmail($data['email']);
+        $merchant->setPhoneNumber($data['phonenumber']);
+        
         $em->flush();
-    
+        
         return $this->json($merchant, 200);
 
-        // if ($form->isSubmitted() && $form->isValid()) {
-        //     $em->flush();
-
-        //     return $this->redirectToRoute('app_merchant_index', [], Response::HTTP_SEE_OTHER);
-        // }
-
-        // return $this->render('merchant/edit.html.twig', [
-        //     'merchant' => $merchant,
-        //     'form' => $form,
-        // ]);
     }
 
     #[Route('/{id}', name: 'app_merchant_delete', methods: ['DELETE'])]
-    // public function delete(Request $request, Merchant $merchant, EntityManagerInterface $entityManager): Response
     public function delete(int $id, MerchantService $merchantService)
     {
-        // if ($this->isCsrfTokenValid('delete'.$merchant->getId(), $request->request->get('_token'))) {
-        //     $entityManager->remove($merchant);
-        //     $entityManager->flush();
-        // }
-
         $merchantMessage = $merchantService->softDeleteMerchant($id);
         return $this->json($merchantMessage);
-        // return $this->redirectToRoute('app_merchant_index', [], Response::HTTP_SEE_OTHER);
     }
 }
