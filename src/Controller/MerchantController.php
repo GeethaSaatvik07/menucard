@@ -26,6 +26,7 @@ use Symfony\Component\Form\Test\FormInterface;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
 use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/merchant')]
 class MerchantController extends AbstractController
@@ -119,40 +120,37 @@ class MerchantController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_merchant_edit', methods: ['PUT'])]
-    public function edit(Request $request, int $id, ManagerRegistry $doctrine)
-    {
+    public function edit(Request $request, int $id, ManagerRegistry $doctrine, ValidatorInterface $validator)
+    {  
         $em = $doctrine->getManager();
         $merchant = $em->getRepository(Merchant::class)->find($id);
-        
+    
         if (!$merchant) {
             return $this->json("Merchant not found", 404);
         }
-        
+    
         $data = json_decode($request->getContent(), true);
-        
-        if (!isset($data['name']) || !ctype_alpha($data['name'])) {
-            return $this->json("Name should contain only alphabets.", 400);
+    
+        $nameConstraint = new Assert\Collection([
+            'name' => [new Assert\NotBlank(), new Assert\Type(['type' => 'alpha', 'message' => 'Name should contain only alphabets.'])],
+            'address' => [new Assert\NotBlank(), new Assert\Regex(['pattern' => '/^[a-zA-Z0-9\s\-,.#]+$/', 'message' => 'Address should be alphanumeric with some special characters ( - , . #).'])],
+            'phonenumber' => [new Assert\NotBlank(), new Assert\Type(['type' => 'digit'])],
+            'email' => [new Assert\NotBlank(), new Assert\Email(['message' => 'Invalid email format.'])],
+        ]);
+    
+        $errors = $validator->validate($data, $nameConstraint);
+    
+        if (count($errors) > 0) {
+            return $this->json($errors, 400);
         }
-        
-        if (!isset($data['address']) || !preg_match('/^[a-zA-Z0-9\s\-,.#]+$/', $data['address'])) {
-            return $this->json("Address should be alphanumeric with some special characters.", 400);
-        }
-          
-        if (!isset($data['phonenumber']) || !ctype_digit($data['phonenumber'])) {
-            return $this->json("Phone number should contain only numbers.", 400);
-        }
-
-        if (!isset($data['email']) || !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-            return $this->json("Invalid email format.", 400);
-        }
-        
+    
         $merchant->setName($data['name']);
         $merchant->setAddress($data['address']);
         $merchant->setEmail($data['email']);
         $merchant->setPhoneNumber($data['phonenumber']);
-        
+    
         $em->flush();
-        
+    
         return $this->json($merchant, 200);
 
     }
